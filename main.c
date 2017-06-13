@@ -1,3 +1,5 @@
+// <TODO>: allow numpad as well as letter control
+
 #include <ncurses.h>
 #include <string.h>
 
@@ -13,9 +15,12 @@
 #define SETPT 3
 #define OUT 4
 // display is calibrated for coefficient values between 0 (inclusive) and 100 (exclusive)
-const float MIN[NUMWIN] =     {     0,     0,     0,    -5,    -6};
-const float MAX[NUMWIN] =     {    10,  14.5,    29,    20,    21};
-const float DEFAULT[NUMWIN] = {     0,     0,     0,     0,     0};
+const float MIN[NUMWIN] =           {     0,     0,     0,    -5,    -6};
+const float MAX[NUMWIN] =           {    10,  14.5,    29,    20,    21};
+const float DEFAULT_STEP[NUMWIN] =  {     0,     0,     0,     0,     0};
+// value is dynamically calculated by step - the default value is dependent on the default step and,
+// therefore, is also dependent on screen size. This dependency could (and should!) be flipped by
+// calculating the value closest to the requested default that falls on a discrete step.
 
 int main() {
   int stdscr_height = 0, stdscr_width = 0;
@@ -39,7 +44,6 @@ int main() {
   windows[SETPT] = newwin(0, SETPT_COLS, COEFF_LINES, 0);
   windows[OUT] = newwin(0, 0, COEFF_LINES, SETPT_COLS);
 
-  // get window dims and calculate coeff_step
   for( int i = 0; i < NUMWIN; i++ ) {
     //wborder(windows[i], '|', '|', '-', '-', '.', '.', '\'', '\'');
     //wrefresh(windows[i]);
@@ -71,7 +75,7 @@ int main() {
   }
 
   // load in default values
-  memcpy(values, DEFAULT, sizeof(DEFAULT));
+  memcpy(step, DEFAULT_STEP, sizeof(DEFAULT_STEP));
 
   int in = 0;
   do {
@@ -79,38 +83,45 @@ int main() {
       case 'q':
         if( step[KP] > 0 ) {
           step[KP]--;
-          values[KP] -= incdec[KP];
         }
         break;
       case 'w':
         if( step[KP] < width[KP] - (2 * WINDOW_MARGIN) - 1 ) {
           step[KP]++;
-          values[KP] += incdec[KP];
         }
         break;
+
       case 'a':
         if( step[KI] > 0 ) {
           step[KI]--;
-          values[KI] -= incdec[KI];
         }
         break;
       case 's':
         if( step[KI] < width[KI] - (2 * WINDOW_MARGIN) - 1 ) {
           step[KI]++;
-          values[KI] += incdec[KI];
         }
         break;
+
       case 'z':
         if( step[KD] > 0 ) {
           step[KD]--;
-          values[KD] -= incdec[KD];
         }
         break;
       case 'x':
         if( step[KD] < width[KD] - (2 * WINDOW_MARGIN) - 1 ) {
           step[KD]++;
-          values[KD] += incdec[KD];
         }
+        break;
+
+      case 'e':
+        // move setpoint up
+        break;
+      case 'c':
+        // move setpoint down
+        break;
+
+      case 'd':
+        memcpy(step, DEFAULT_STEP, sizeof(DEFAULT_STEP));
         break;
       default:
         break;
@@ -118,6 +129,7 @@ int main() {
 
     // fill in sliders and values
     for( int i = 0; i < NUMWIN; i++ ) {
+      values[i] = MIN[i] + (step[i] * incdec[i]);
       if( i == KP || i == KI || i == KD ) {
 
         // protect from "-0.00"
