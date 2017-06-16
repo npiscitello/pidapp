@@ -5,8 +5,8 @@
 
 // window macros
 #define NUMWIN          5
-#define COEFF_LINES     5
-#define SETPT_COLS      10
+#define COEFF_LINES     4
+#define SETPT_COLS      9
 
 /* Horizontal OR vertical space between window edge and window content, in characters. The axis
  * depends on the shape of the window - horizontal space will be applied in short, wide windows
@@ -21,8 +21,8 @@
 #define SETPT   3
 #define OUT     4
 // display is calibrated for coefficient values between 0 (inclusive) and 100 (exclusive)
-const float MIN[NUMWIN] =           {     0,     0,     0,    -5,    -6};
-const float MAX[NUMWIN] =           {    10,  14.5,    29,    20,    21};
+const float MIN[NUMWIN] =           {     0,     0,     0,   -10,   -11};
+const float MAX[NUMWIN] =           {    10,  14.5,    29,    10,    11};
 const float DEFAULT_STEP[NUMWIN] =  {     0,     0,     0,     0,     0};
 // value is dynamically calculated by step - the default value is dependent on the default step and,
 // therefore, is also dependent on screen size. This dependency could (and should!) be flipped by
@@ -59,8 +59,8 @@ int main() {
 
   for( int i = 0; i < NUMWIN; i++ ) {
 #ifdef BORDERS
-    wborder(windows[i], '|', '|', '-', '-', '.', '.', '\'', '\'');
-    wrefresh(windows[i]);
+    wborder(win[i].hdl, '|', '|', '-', '-', '.', '.', '\'', '\'');
+    wrefresh(win[i].hdl);
 #endif
     getmaxyx(win[i].hdl, win[i].height, win[i].width);
     incdec[i] = (MAX[i] - MIN[i]) / (win[i].width - (2 * WINDOW_MARGIN + 2) - 1);
@@ -89,8 +89,19 @@ int main() {
     }
   }
 
-  // draw slider borders and labels in setpoint and output windows
-  //mvwprintw(windows[SETPT], 
+  // draw slider borders and labels in setpoint and output windows (this is difficult b/c vertical)
+  mvwprintw(win[SETPT].hdl, WINDOW_MARGIN, (win[SETPT].width / 2) + 1, "-");
+  mvwprintw(win[SETPT].hdl, win[SETPT].height - (2 * WINDOW_MARGIN), (win[SETPT].width / 2) + 1, "-");
+  mvwprintw(win[SETPT].hdl, WINDOW_MARGIN + 1, (win[SETPT].width / 2) - 1, "^");
+  mvwprintw(win[SETPT].hdl, WINDOW_MARGIN + 2, (win[SETPT].width / 2) - 1, "e");
+  mvwprintw(win[SETPT].hdl, win[SETPT].height - (2 * WINDOW_MARGIN) - 1, (win[SETPT].width / 2) - 1, "v");
+  mvwprintw(win[SETPT].hdl, win[SETPT].height - (2 * WINDOW_MARGIN) - 2, (win[SETPT].width / 2) - 1, "c");
+  mvwprintw(win[SETPT].hdl, (win[SETPT].height / 2) - 2, (win[SETPT].width / 2) - 1, "S");
+  mvwprintw(win[SETPT].hdl, (win[SETPT].height / 2) - 1, (win[SETPT].width / 2) - 1, "E");
+  mvwprintw(win[SETPT].hdl, (win[SETPT].height / 2) + 0, (win[SETPT].width / 2) - 1, "T");
+  mvwprintw(win[SETPT].hdl, (win[SETPT].height / 2) + 1, (win[SETPT].width / 2) - 1, "P");
+  mvwprintw(win[SETPT].hdl, (win[SETPT].height / 2) + 2, (win[SETPT].width / 2) - 1, "T");
+  wrefresh(win[SETPT].hdl);
 
   // load in default values
   memcpy(step, DEFAULT_STEP, sizeof(DEFAULT_STEP));
@@ -132,10 +143,14 @@ int main() {
         break;
 
       case 'e':
-        // move setpoint up
+        if( step[SETPT] > 0 ) {
+          step[SETPT]--;
+        }
         break;
       case 'c':
-        // move setpoint down
+        if( step[SETPT] < win[SETPT].height - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
+          step[SETPT]++;
+        }
         break;
 
       case 'd':
@@ -148,22 +163,40 @@ int main() {
     // fill in sliders and values
     for( int i = 0; i < NUMWIN; i++ ) {
       value[i] = MIN[i] + (step[i] * incdec[i]);
-      if( i == KP || i == KI || i == KD ) {
+      switch( i ) {
+        // intentional fallthroughs
+        case KP:
+        case KI:
+        case KD:
+          // protect from "-0.00"
+          mvwprintw(win[i].hdl, win[i].height / 2 - 1, win[i].width / 2, "%05.2f", 
+              (value[i] < incdec[i]) ? 0 : value[i]);
 
-        // protect from "-0.00"
-        mvwprintw(win[i].hdl, win[i].height / 2 - 1, win[i].width / 2, "%05.2f", 
-            (value[i] < incdec[i]) ? 0 : value[i]);
+          // print slider
+          for( int j = 0; j < step[i]; j++ ) {
+            mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + j, "=");
+          }
+          mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + step[i], "O");
+          for( int j = step[i] + 1; j < win[i].width - (2 * (WINDOW_MARGIN + 1)); j++ ) {
+            mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + j, "-");
+          }
+          break;
 
-        // print slider
-        for( int j = 0; j < step[i]; j++ ) {
-          mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + j, "=");
-        }
-        mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + step[i], "O");
-        for( int j = step[i] + 1; j < win[i].width - (2 * (WINDOW_MARGIN + 1)); j++ ) {
-          mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + j, "-");
-        }
-        wrefresh(win[i].hdl);
+        case SETPT:
+          // print slider
+          for( int j = 0; j < step[i]; j++ ) {
+            mvwprintw(win[i].hdl, WINDOW_MARGIN + 1 + j, (win[i].width / 2) + 1, "|");
+          }
+          mvwprintw(win[i].hdl, WINDOW_MARGIN + 1 + step[i], (win[i].width / 2) + 1, "O");
+          for( int j = step[i] + 1; j < win[i].height - (2 * (WINDOW_MARGIN + 1)); j++ ) {
+            mvwprintw(win[i].hdl, WINDOW_MARGIN + 1 + j, (win[i].width / 2) + 1, "H");
+          }
+          break;
+
+        case OUT:
+          break;
       }
+      wrefresh(win[i].hdl);
     }
   } while( (in = getch()) != ' ' );
 
