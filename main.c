@@ -20,13 +20,10 @@
 #define KD      2
 #define SETPT   3
 #define OUT     4
-// display is calibrated for coefficient values between 0 (inclusive) and 100 (exclusive)
-const float MIN[NUMWIN] =           {     0,     0,     0,   -10,   -11};
-const float MAX[NUMWIN] =           {    10,  14.5,    29,    10,    11};
-const float DEFAULT_STEP[NUMWIN] =  {     0,     0,     0,     0,     0};
-// value is dynamically calculated by step - the default value is dependent on the default step and,
-// therefore, is also dependent on screen size. This dependency could (and should!) be flipped by
-// calculating the value closest to the requested default that falls on a discrete step.
+// calibrated for min/max values between 0 (inclusive) and 100 (exclusive)
+const float MIN[NUMWIN] =           {     0,     0,     0,     0,     0};
+const float MAX[NUMWIN] =           {    10,  14.5,    29,    20,    20};
+const float DEFAULT_VALUE[NUMWIN] =  {     5, 7.25,  14.5,    10,    10};
 
 int main() {
   int stdscr_height = 0, stdscr_width = 0;
@@ -63,7 +60,19 @@ int main() {
     wrefresh(win[i].hdl);
 #endif
     getmaxyx(win[i].hdl, win[i].height, win[i].width);
-    incdec[i] = (MAX[i] - MIN[i]) / (win[i].width - (2 * WINDOW_MARGIN + 2) - 1);
+    switch( i ) {
+      // intentional fall-throughs
+      case KP:
+      case KI:
+      case KD:
+        incdec[i] = (MAX[i] - MIN[i]) / (win[i].width - (2 * WINDOW_MARGIN + 2) - 1);
+        break;
+      // intentional fall-through
+      case SETPT:
+      case OUT:
+        incdec[i] = (MAX[i] - MIN[i]) / (win[i].height - (2 * WINDOW_MARGIN + 2) - 1);
+        break;
+    }
   }
 
   // draw slider borders and labels in K windows
@@ -104,57 +113,57 @@ int main() {
   wrefresh(win[SETPT].hdl);
 
   // load in default values
-  memcpy(step, DEFAULT_STEP, sizeof(DEFAULT_STEP));
+  memcpy(value, DEFAULT_VALUE, sizeof(DEFAULT_VALUE));
 
   int in = 0;
   do {
     switch( in ) {
       case 'q':
         if( step[KP] > 0 ) {
-          step[KP]--;
+          value[KP] -= incdec[KP];
         }
         break;
       case 'w':
         if( step[KP] < win[KP].width - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
-          step[KP]++;
+          value[KP] += incdec[KP];
         }
         break;
 
       case 'a':
         if( step[KI] > 0 ) {
-          step[KI]--;
+          value[KI] -= incdec[KI];
         }
         break;
       case 's':
         if( step[KI] < win[KI].width - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
-          step[KI]++;
+          value[KI] += incdec[KI];
         }
         break;
 
       case 'z':
         if( step[KD] > 0 ) {
-          step[KD]--;
+          value[KD] -= incdec[KD];
         }
         break;
       case 'x':
         if( step[KD] < win[KD].width - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
-          step[KD]++;
+          value[KD] += incdec[KD];
         }
         break;
 
       case 'e':
         if( step[SETPT] > 0 ) {
-          step[SETPT]--;
+          value[SETPT] -= incdec[SETPT];
         }
         break;
       case 'c':
         if( step[SETPT] < win[SETPT].height - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
-          step[SETPT]++;
+          value[SETPT] += incdec[SETPT];
         }
         break;
 
       case 'd':
-        memcpy(step, DEFAULT_STEP, sizeof(DEFAULT_STEP));
+        memcpy(value, DEFAULT_VALUE, sizeof(DEFAULT_VALUE));
         break;
       default:
         break;
@@ -162,7 +171,7 @@ int main() {
 
     // fill in sliders and values
     for( int i = 0; i < NUMWIN; i++ ) {
-      value[i] = MIN[i] + (step[i] * incdec[i]);
+      step[i] = (value[i] - MIN[i]) / incdec[i];
       switch( i ) {
         // intentional fallthroughs
         case KP:
