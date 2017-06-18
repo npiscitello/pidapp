@@ -19,7 +19,7 @@
 #define KI      1
 #define KD      2
 #define SETPT   3
-#define OUT     4
+#define INPUT     4
 // calibrated for min/max values between 0 (inclusive) and 100 (exclusive)
 const float MIN[NUMWIN] =           {     0,     0,     0,     0,     0};
 const float MAX[NUMWIN] =           {    10,  14.5,    29,    20,    20};
@@ -52,7 +52,7 @@ int main() {
   win[KI].hdl     = newwin(COEFF_LINES, stdscr_width / 3, 0, stdscr_width / 3);
   win[KD].hdl     = newwin(COEFF_LINES, 0, 0, 2 * (stdscr_width / 3));
   win[SETPT].hdl  = newwin(0, SETPT_COLS, COEFF_LINES, 0);
-  win[OUT].hdl    = newwin(0, 0, COEFF_LINES, SETPT_COLS);
+  win[INPUT].hdl    = newwin(0, 0, COEFF_LINES, SETPT_COLS);
 
   for( int i = 0; i < NUMWIN; i++ ) {
 #ifdef BORDERS
@@ -69,7 +69,7 @@ int main() {
         break;
       // intentional fall-through
       case SETPT:
-      case OUT:
+      case INPUT:
         incdec[i] = (MAX[i] - MIN[i]) / (win[i].height - (2 * WINDOW_MARGIN + 2) - 1);
         break;
     }
@@ -202,7 +202,7 @@ int main() {
           }
           break;
 
-        case OUT:
+        case INPUT:
           break;
       }
       wrefresh(win[i].hdl);
