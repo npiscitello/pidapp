@@ -5,4 +5,14 @@ PID functions to come soon!
 
 # Compile
 
-  gcc main.c -lncurses
+To make both debug and release versions:
+  make
+
+debug:
+  make debug
+
+release:
+  make app
+
+To start fresh:
+  make clean
