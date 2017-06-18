@@ -6,13 +6,21 @@ PID functions to come soon!
 # Compile
 
 To make both debug and release versions:
-  make
+
+    make
+    
+or
+
+    make all
 
 debug:
-  make debug
+
+    make debug
 
 release:
-  make app
+
+    make app
 
 To start fresh:
-  make clean
+
+    make clean
