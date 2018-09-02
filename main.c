@@ -10,7 +10,6 @@ float value[NUMWIN];
 int main() {
   setup_windows();
   memcpy(value, DEFAULT_VALUE, sizeof(DEFAULT_VALUE));
-  //memcpy(value, MAX, sizeof(DEFAULT_VALUE));
   for( int i = 0; i < NUMWIN; i++ ) {
     set_window_value(i, value[i]);
   }

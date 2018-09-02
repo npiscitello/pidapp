@@ -113,6 +113,7 @@ void set_window_value(int window, float value) {
   // the int implicitly floors it, but that's not necessarily what we want
   // besides, its better to be explicit
   int step = round((value - MIN[window]) / incdec[window]);
+  // storage to 'flip' the step if we're drawing the setpoint
   switch( window ) {
     // intentional fallthroughs
     case KP:
@@ -133,13 +134,18 @@ void set_window_value(int window, float value) {
       break;
 
     case SETPT:
+      // 'flip' the step b/c y increases from top -> bottom in ncurses
+      // (this will also 'flip' whatever round decides above - that is, if the slider should
+      // be perfectly in the middle but there are an even number of steps, if the step is
+      // biased one up above, it'll be biased one down here)
+      step = (win[window].height - (2 * (WINDOW_MARGIN + 1)) - 1) - step;
       // print slider
-      for( int j = 0; j < step; j++ ) {
-        mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + j, (win[window].width / 2) + 1, "|");
+      for( int j = win[window].height - (2 * (WINDOW_MARGIN + 1)) - 1; j > step; j-- ) {
+        mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + j, (win[window].width / 2) + 1, "H");
       }
       mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + step, (win[window].width / 2) + 1, "O");
-      for( int j = step + 1; j < win[window].height - (2 * (WINDOW_MARGIN + 1)); j++ ) {
-        mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + j, (win[window].width / 2) + 1, "H");
+      for( int j = step - 1; j >= 0; j-- ) {
+        mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + j, (win[window].width / 2) + 1, "|");
       }
       break;
 
