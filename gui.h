@@ -3,6 +3,7 @@
 
 #include <ncurses.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "defines.h"
 
@@ -15,7 +16,7 @@ struct metadata {
 struct metadata win[NUMWIN]; 
 // these go outside the struct b/c they're not really window metadata
 int step[NUMWIN];
-float value[NUMWIN], incdec[NUMWIN];
+float incdec[NUMWIN];
 
 
 
@@ -40,7 +41,7 @@ void setup_windows(void) {
   win[OUTPUT].hdl    = newwin(0, 0, COEFF_LINES, SETPT_COLS);
 
 
-  // calculate the value of a button press based on the window size
+  // calculate the value of a tick mark based on the window size
   for( int i = 0; i < NUMWIN; i++ ) {
 #ifdef BORDERS
     wborder(win[i].hdl, '|', '|', '-', '-', '.', '.', '\'', '\'');
@@ -100,6 +101,52 @@ void setup_windows(void) {
   mvwprintw(win[SETPT].hdl, (win[SETPT].height / 2) + 1, (win[SETPT].width / 2) - 1, "P");
   mvwprintw(win[SETPT].hdl, (win[SETPT].height / 2) + 2, (win[SETPT].width / 2) - 1, "T");
   wrefresh(win[SETPT].hdl);
+
+  return;
+}
+
+
+
+// set a value on the slider of the specified window
+void set_window_value(int window, float value) {
+
+  // the int implicitly floors it, but that's not necessarily what we want
+  // besides, its better to be explicit
+  int step = round((value - MIN[window]) / incdec[window]);
+  switch( window ) {
+    // intentional fallthroughs
+    case KP:
+    case KI:
+    case KD:
+      // protect from "-0.00"
+      mvwprintw(win[window].hdl, win[window].height / 2 - 1, win[window].width / 2, "%05.2f", 
+          (value < incdec[window]) ? 0 : value);
+
+      // print slider
+      for( int j = 0; j < step; j++ ) {
+        mvwprintw(win[window].hdl, win[window].height / 2, WINDOW_MARGIN + 1 + j, "=");
+      }
+      mvwprintw(win[window].hdl, win[window].height / 2, WINDOW_MARGIN + 1 + step, "O");
+      for( int j = step + 1; j < win[window].width - (2 * (WINDOW_MARGIN + 1)); j++ ) {
+        mvwprintw(win[window].hdl, win[window].height / 2, WINDOW_MARGIN + 1 + j, "-");
+      }
+      break;
+
+    case SETPT:
+      // print slider
+      for( int j = 0; j < step; j++ ) {
+        mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + j, (win[window].width / 2) + 1, "|");
+      }
+      mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + step, (win[window].width / 2) + 1, "O");
+      for( int j = step + 1; j < win[window].height - (2 * (WINDOW_MARGIN + 1)); j++ ) {
+        mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + j, (win[window].width / 2) + 1, "H");
+      }
+      break;
+
+    case OUTPUT:
+      break;
+  }
+  wrefresh(win[window].hdl);
 
   return;
 }

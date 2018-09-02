@@ -5,13 +5,17 @@
 #include "gui.h"
 #include "defines.h"
 
+float value[NUMWIN];
+
 int main() {
   setup_windows();
+  memcpy(value, DEFAULT_VALUE, sizeof(DEFAULT_VALUE));
+  //memcpy(value, MAX, sizeof(DEFAULT_VALUE));
+  for( int i = 0; i < NUMWIN; i++ ) {
+    set_window_value(i, value[i]);
+  }
 
   /*
-  // load in default values
-  memcpy(value, DEFAULT_VALUE, sizeof(DEFAULT_VALUE));
-
   int in = 0;
   do {
     switch( in ) {
@@ -68,41 +72,6 @@ int main() {
 
     // fill in sliders and values
     for( int i = 0; i < NUMWIN; i++ ) {
-      step[i] = (value[i] - MIN[i]) / incdec[i];
-      switch( i ) {
-        // intentional fallthroughs
-        case KP:
-        case KI:
-        case KD:
-          // protect from "-0.00"
-          mvwprintw(win[i].hdl, win[i].height / 2 - 1, win[i].width / 2, "%05.2f", 
-              (value[i] < incdec[i]) ? 0 : value[i]);
-
-          // print slider
-          for( int j = 0; j < step[i]; j++ ) {
-            mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + j, "=");
-          }
-          mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + step[i], "O");
-          for( int j = step[i] + 1; j < win[i].width - (2 * (WINDOW_MARGIN + 1)); j++ ) {
-            mvwprintw(win[i].hdl, win[i].height / 2, WINDOW_MARGIN + 1 + j, "-");
-          }
-          break;
-
-        case SETPT:
-          // print slider
-          for( int j = 0; j < step[i]; j++ ) {
-            mvwprintw(win[i].hdl, WINDOW_MARGIN + 1 + j, (win[i].width / 2) + 1, "|");
-          }
-          mvwprintw(win[i].hdl, WINDOW_MARGIN + 1 + step[i], (win[i].width / 2) + 1, "O");
-          for( int j = step[i] + 1; j < win[i].height - (2 * (WINDOW_MARGIN + 1)); j++ ) {
-            mvwprintw(win[i].hdl, WINDOW_MARGIN + 1 + j, (win[i].width / 2) + 1, "H");
-          }
-          break;
-
-        case OUTPUT:
-          break;
-      }
-      wrefresh(win[i].hdl);
     }
   } while( (in = getch()) != ' ' );
 

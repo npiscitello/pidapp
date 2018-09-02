@@ -1,5 +1,5 @@
 CSRCS 		:= 	main.c
-CLIBS 		:= 	-lncurses
+CLIBS 		:= 	-lncurses -lm
 
 CAPP 			:= 	pidapp
 CDEBUG 		:= 	$(CAPP)-debug
@@ -31,5 +31,5 @@ $(CDEBUG): $(CSRCS)
 .PHONY: clean
 clean: 
 	@echo -e "\nCleaning up..."
-	rm $(CAPP) $(CDEBUG)
+	rm -f $(CAPP) $(CDEBUG)
 	@echo -e "...done!\n"
