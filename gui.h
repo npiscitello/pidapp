@@ -108,12 +108,9 @@ void setup_windows(void) {
 
 
 // set a value on the slider of the specified window
-void set_window_value(int window, float value) {
+void set_window_value(const int window, const float value) {
 
-  // the int implicitly floors it, but that's not necessarily what we want
-  // besides, its better to be explicit
   int step = round((value - MIN[window]) / incdec[window]);
-  // storage to 'flip' the step if we're drawing the setpoint
   switch( window ) {
     // intentional fallthroughs
     case KP:
@@ -154,6 +151,14 @@ void set_window_value(int window, float value) {
   }
   wrefresh(win[window].hdl);
 
+  return;
+}
+
+// update all windows
+void update_windows(const float* in_vals) {
+  for( int i = 0; i < NUMWIN; i++ ) {
+    set_window_value(i, in_vals[i]);
+  }
   return;
 }
 

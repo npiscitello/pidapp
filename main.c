@@ -14,41 +14,28 @@ int main() {
     set_window_value(i, value[i]);
   }
 
-  /*
   int in = 0;
   do {
     switch( in ) {
       case 'q':
-        if( step[KP] > 0 ) {
-          value[KP] -= incdec[KP];
-        }
+        (value[KP] >= MIN[KP] + incdec[KP]) ? (value[KP] -= incdec[KP]) : (value[KP] = MIN[KP]);
         break;
       case 'w':
-        if( step[KP] < win[KP].width - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
-          value[KP] += incdec[KP];
-        }
+        (value[KP] <= MAX[KP] - incdec[KP]) ? (value[KP] += incdec[KP]) : (value[KP] = MAX[KP]);
         break;
 
       case 'a':
-        if( step[KI] > 0 ) {
-          value[KI] -= incdec[KI];
-        }
+        (value[KI] >= MIN[KI] + incdec[KI]) ? (value[KI] -= incdec[KI]) : (value[KI] = MIN[KI]);
         break;
       case 's':
-        if( step[KI] < win[KI].width - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
-          value[KI] += incdec[KI];
-        }
+        (value[KI] <= MAX[KI] - incdec[KI]) ? (value[KI] += incdec[KI]) : (value[KI] = MAX[KI]);
         break;
 
       case 'z':
-        if( step[KD] > 0 ) {
-          value[KD] -= incdec[KD];
-        }
+        (value[KD] >= MIN[KD] + incdec[KD]) ? (value[KD] -= incdec[KD]) : (value[KD] = MIN[KD]);
         break;
       case 'x':
-        if( step[KD] < win[KD].width - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
-          value[KD] += incdec[KD];
-        }
+        (value[KD] <= MAX[KD] - incdec[KD]) ? (value[KD] += incdec[KD]) : (value[KD] = MAX[KD]);
         break;
 
       case 'e':
@@ -70,13 +57,9 @@ int main() {
     }
 
     // fill in sliders and values
-    for( int i = 0; i < NUMWIN; i++ ) {
-    }
+    update_windows(value);
   } while( (in = getch()) != ' ' );
 
-  */
-
-  getch();
   endwin();
   return 0;
 }
