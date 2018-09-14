@@ -16,6 +16,8 @@ int main() {
 
   int in = 0;
   do {
+    // our increment/decrement value is calculated based on window size to ensure the slider always
+    // moves when you hit a button
     switch( in ) {
       case 'q':
         (value[KP] >= MIN[KP] + incdec[KP]) ? (value[KP] -= incdec[KP]) : (value[KP] = MIN[KP]);
@@ -38,15 +40,11 @@ int main() {
         (value[KD] <= MAX[KD] - incdec[KD]) ? (value[KD] += incdec[KD]) : (value[KD] = MAX[KD]);
         break;
 
-      case 'e':
-        if( step[SETPT] > 0 ) {
-          value[SETPT] -= incdec[SETPT];
-        }
-        break;
       case 'c':
-        if( step[SETPT] < win[SETPT].height - (2 * (WINDOW_MARGIN + 1)) - 1 ) {
-          value[SETPT] += incdec[SETPT];
-        }
+        (value[SETPT] >= MIN[SETPT] + incdec[SETPT]) ? (value[SETPT] -= incdec[SETPT]) : (value[SETPT] = MIN[SETPT]);
+        break;
+      case 'e':
+        (value[SETPT] <= MAX[SETPT] - incdec[SETPT]) ? (value[SETPT] += incdec[SETPT]) : (value[SETPT] = MAX[SETPT]);
         break;
 
       case 'd':
