@@ -189,9 +189,11 @@ void update_input_windows(const float* vals) {
 }
 
 // update output window
-void update_output_window(const float* vals) {
+void update_output_window(int fd, short event, void* vals) {
+  (void) fd;
+  (void) event;
   // draw the setpoint history w/ standard set window value, then draw PID value on top of it
-  set_window_value(OUTPUT, vals[SETPT]);
+  set_window_value(OUTPUT, ((float*) vals)[SETPT]);
 }
 
 #endif

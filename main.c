@@ -1,14 +1,16 @@
 // <TODO>: allow numpad as well as letter control
 
+// <TODO> spin up a thread to handle input (and display) and a thread to handle calculation and
+// periodic output (scrolling window). It's about time I learned how to use threads...
+
 #include <string.h>
 #include <sys/time.h>
+#include <event.h>
 
 #include "gui.h"
 #include "defines.h"
 
 float value[NUMWIN];
-
-struct timeval time;
 
 int main() {
   setup_windows();
@@ -17,8 +19,16 @@ int main() {
     set_window_value(i, value[i]);
   }
 
-  // this loop needs to run full speed - we poll for timing and keypresses
-  nodelay(stdscr, true);
+  event_init();
+  // set up output timing
+  struct event output_event;
+  struct timeval timing;
+  //timing.tv_sec = 0; timing.tv_usec = UPDATE_PER_US;
+  timing.tv_sec = 1; timing.tv_usec = 0;
+  evtimer_set(&output_event, update_output_window, value);
+  event_add(&output_event, &timing);
+  event_dispatch();
+
   int in = 0;
   do {
     // our increment/decrement value is calculated based on window size to ensure the slider always
@@ -77,13 +87,6 @@ int main() {
 
     // fill in sliders and values
     update_input_windows(value);
-
-    // figure out if we need to update the output
-    gettimeofday(&time, NULL);
-    if( time.tv_usec % UPDATE_PER * 1000 == 0 ) {
-      // update stuff
-      update_output_window(value);
-    }
   } while( (in = getch()) != ' ' );
 
   endwin();

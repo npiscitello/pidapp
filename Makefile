@@ -1,5 +1,5 @@
 CSRCS 		:= 	main.c
-CLIBS 		:= 	-lncurses -lm
+CLIBS 		:= 	-lncurses -lm -levent
 
 CAPP 			:= 	pidapp
 CDEBUG 		:= 	$(CAPP)-debug

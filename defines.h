@@ -28,8 +28,7 @@ const float MIN[NUMWIN] =           {     0,     0,     0,     0,     0};
 const float MAX[NUMWIN] =           {    10,  14.5,    29,    20,    20};
 const float DEFAULT_VALUE[NUMWIN] = {     5,  7.25,  14.5,    10,    10};
 
-// milliseconds between output screen updates
-//#define UPDATE_PER 250
-#define UPDATE_PER 10000
+// microseconds between output screen updates
+#define UPDATE_PER_US 500000
 
 #endif

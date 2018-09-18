@@ -24,3 +24,6 @@ release:
 To start fresh:
 
     make clean
+
+# Aknowledgements
+This project uses libevent, http://libevent.org/
