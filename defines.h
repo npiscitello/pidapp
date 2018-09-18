@@ -11,11 +11,11 @@
 #define SETPT_COLS      9
 
 // Indexes
-#define KP      0
-#define KI      1
-#define KD      2
-#define SETPT   3
-#define OUTPUT  4
+#define KP      0   // proportional
+#define KI      1   // integral
+#define KD      2   // derivative
+#define SETPT   3   // setpoint
+#define OUTPUT  4   // PID-controlled output
 
 /* Horizontal OR vertical space between window edge and window content, in characters. The axis
  * depends on the shape of the window - horizontal space will be applied in short, wide windows
@@ -27,5 +27,9 @@
 const float MIN[NUMWIN] =           {     0,     0,     0,     0,     0};
 const float MAX[NUMWIN] =           {    10,  14.5,    29,    20,    20};
 const float DEFAULT_VALUE[NUMWIN] = {     5,  7.25,  14.5,    10,    10};
+
+// milliseconds between output screen updates
+//#define UPDATE_PER 250
+#define UPDATE_PER 10000
 
 #endif

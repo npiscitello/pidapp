@@ -147,6 +147,30 @@ void set_window_value(const int window, const float value) {
       break;
 
     case OUTPUT:
+      // 'flip' the step as described above
+      step = (win[window].height - (2 * (WINDOW_MARGIN + 1)) - 1) - step;
+
+      // figure out where the last setpoint was
+      int y = WINDOW_MARGIN;
+      /*
+      for(  ; 
+            (y < win[window].height - WINDOW_MARGIN) || 
+              (mvwinch(win[window].hdl, y, WINDOW_MARGIN + 2) & A_CHARTEXT) == '+'; 
+            y++ ) {
+      }
+      */
+      for( ; y < win[window].height - WINDOW_MARGIN; y++ ) {
+        chtype read = mvwinch(win[window].hdl, y, WINDOW_MARGIN + 2);
+        if( (read & A_CHARTEXT) == '+' )
+          break;
+        //mvwaddch(win[window].hdl, y, WINDOW_MARGIN + 3, read);
+      }
+      // clear and re-draw left-most column
+      mvwvline(win[window].hdl, 0, WINDOW_MARGIN + 2, ' ', win[window].height);
+      mvwprintw(win[window].hdl, WINDOW_MARGIN + 1 + step, WINDOW_MARGIN + 2, "+");
+      // clear and re-draw second to left-most column
+      mvwvline(win[window].hdl, 0, WINDOW_MARGIN + 3, ' ', win[window].height);
+      mvwprintw(win[window].hdl, y, WINDOW_MARGIN + 3, "+");
       break;
   }
   wrefresh(win[window].hdl);
@@ -154,12 +178,20 @@ void set_window_value(const int window, const float value) {
   return;
 }
 
-// update all windows
-void update_windows(const float* in_vals) {
+// update input windows
+void update_input_windows(const float* vals) {
   for( int i = 0; i < NUMWIN; i++ ) {
-    set_window_value(i, in_vals[i]);
+    if( i != OUTPUT ) {
+      set_window_value(i, vals[i]);
+    }
   }
   return;
+}
+
+// update output window
+void update_output_window(const float* vals) {
+  // draw the setpoint history w/ standard set window value, then draw PID value on top of it
+  set_window_value(OUTPUT, vals[SETPT]);
 }
 
 #endif
